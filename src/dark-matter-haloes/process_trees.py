@@ -3,7 +3,7 @@ from multiprocessing import cpu_count, Pool
 import os
 from pathlib import Path
 
-from halo_reader import HaloReader
+from toolset.halo_reader import HaloReader
 
 
 def main():

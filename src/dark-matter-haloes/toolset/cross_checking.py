@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from halo_reader import HaloReader
+from toolset.halo_reader import HaloReader
 
 
 def map_position(x, y, z, grid_size, total_length=70.4):

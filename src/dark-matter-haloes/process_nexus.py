@@ -4,7 +4,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from halo_reader import HaloReader
+from toolset.halo_reader import HaloReader
 
 
 def main():
