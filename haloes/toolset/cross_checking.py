@@ -1,3 +1,4 @@
+import argparse
 from multiprocessing import cpu_count, Pool
 import os
 from pathlib import Path
@@ -19,25 +20,40 @@ def map_position(x, y, z, grid_size, total_length=70.4):
 
 
 def run():
-    color_trees_path = 'color_trees'
-    nexus_path = 'color_cold_s159_nexus_all_clean.MMF'
     flag_ids = {0: 'Void', 1: 'Undefined',
                 2: 'Wall', 3: 'Filament', 4: 'Node'}
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-c',
+        '--color_trees',
+        type=str,
+        default='color_trees',
+        help='Path to the directory with merger tree files to process'
+    )
+    parser.add_argument(
+        '-n',
+        '--nexus',
+        type=str,
+        default='color_cold_s159_nexus_all_clean.MMF',
+        help='Path to the file with NEXUS+ classification output'
+    )
+    args = parser.parse_args()
     Path(os.path.join('output', 'cross_check')).mkdir(
         parents=True, exist_ok=True)
 
-    nexus_voxels = HaloReader.read_nexus(nexus_path)
+    nexus_voxels = HaloReader.read_nexus(args.nexus)
 
     color_trees = [
-        os.path.join(color_trees_path, filename)
-        for filename in os.listdir(color_trees_path)
+        os.path.join(args.color_trees, filename)
+        for filename in os.listdir(args.color_trees)
     ]
     with Pool(processes=min(len(color_trees), cpu_count())) as pool:
         processed = pool.map(HaloReader.process_tree, color_trees)
 
     massive = pd.DataFrame()
-    for file in tqdm(processed):
-        haloes = pd.read_csv(file)
+    for entry in tqdm(processed):
+        haloes = entry[0]
+        filename = entry[1]
         if haloes.empty:
             continue
         haloes = haloes.sort_values(by=['mass'], ascending=False)
@@ -56,7 +72,7 @@ def run():
         fig, ax = plt.subplots()
         ax.hist(haloes['type'], bins=5)
         fig.tight_layout()
-        output_filename = os.path.basename(file).replace('.csv', '.pdf')
+        output_filename = os.path.basename(filename).replace('.hdf5', '.pdf')
         plt.savefig(os.path.join('output', 'cross_check',
                     output_filename), format='pdf')
         plt.close()
@@ -67,7 +83,8 @@ def run():
         ax.hist(haloes['mass'], bins=logbins)
         plt.xscale('log')
         fig.tight_layout()
-        output_filename = os.path.basename(file).replace('.csv', '_mass.pdf')
+        output_filename = os.path.basename(
+            filename).replace('.hdf5', '_mass.pdf')
         plt.savefig(os.path.join('output', 'cross_check',
                     output_filename), format='pdf')
         plt.close()

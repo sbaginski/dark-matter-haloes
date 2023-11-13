@@ -29,14 +29,15 @@ class HaloReader:
         matrix = voxels[slice_index]
         mat = plt.matshow(matrix, norm=norm)
 
-        def lp(i): return plt.plot(
-            [],
-            color=mat.cmap(mat.norm(i)),
-            mec="none",
-            label=flag_ids[i],
-            ls="",
-            marker="o"
-        )[0]
+        def lp(i):
+            return plt.plot(
+                [],
+                color=mat.cmap(mat.norm(i)),
+                mec="none",
+                label=flag_ids[i],
+                ls="",
+                marker="o"
+            )[0]
         handles = [lp(i) for i in flag_ids]
         plt.legend(handles=handles, loc='center left', bbox_to_anchor=(1, 0.5))
         plt.savefig(output_path, format='pdf', bbox_inches='tight')
@@ -74,17 +75,13 @@ class HaloReader:
             }
         )
         tree_data.close()
-        output_path = os.path.join(
-            'processed',
-            os.path.basename(tree_filename).replace('.hdf5', '.csv')
-        )
-        haloes.to_csv(output_path)
         print(f'Processed {tree_filename}')
-        return output_path
+        return (haloes, tree_filename)
 
     @classmethod
-    def plot_tree(cls, halo_filename):
-        haloes = pd.read_csv(halo_filename)
+    def plot_tree(cls, processed_output):
+        haloes = processed_output[0]
+        halo_filename = processed_output[1]
 
         fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
@@ -100,7 +97,7 @@ class HaloReader:
         output_path = os.path.join(
             'output',
             'position',
-            os.path.basename(halo_filename).replace('.csv', '_position.pdf')
+            os.path.basename(halo_filename).replace('.hdf5', '_position.pdf')
         )
         plt.savefig(output_path, format='pdf')
         plt.close()
@@ -114,7 +111,7 @@ class HaloReader:
         output_path = os.path.join(
             'output',
             'v_circ',
-            os.path.basename(halo_filename).replace('.csv', '_v_circ.pdf')
+            os.path.basename(halo_filename).replace('.hdf5', '_v_circ.pdf')
         )
         plt.savefig(output_path, format='pdf')
         plt.close()

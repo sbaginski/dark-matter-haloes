@@ -17,7 +17,6 @@ def main():
     )
     args = parser.parse_args()
 
-    Path('processed').mkdir(parents=True, exist_ok=True)
     Path('output/position').mkdir(parents=True, exist_ok=True)
     Path('output/v_circ').mkdir(parents=True, exist_ok=True)
     color_trees = [
